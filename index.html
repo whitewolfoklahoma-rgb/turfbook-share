@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TurfBook — Lawn Care Season Program & Route Book</title>
+<style>
+  :root{
+    --green:#2e7d32; --green-d:#1b5e20; --lime:#8bc34a; --ink:#1c2420;
+    --paper:#f7f9f4; --card:#ffffff; --line:#d8e0d2; --mut:#5d6d60;
+    --red:#b3261e; --amber:#e65100; --amber-bg:#fff3e0; --red-bg:#fdecea;
+    --green-bg:#e8f5e9; --blue:#1565c0; --blue-bg:#e3f2fd;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--paper);color:var(--ink);font-size:15px;line-height:1.45}
+  header{background:linear-gradient(135deg,var(--green-d),var(--green));color:#fff;padding:14px 16px 10px}
+  header h1{margin:0;font-size:22px;letter-spacing:.3px}
+  header .sub{opacity:.9;font-size:13px;margin-top:2px}
+  header .seasonline{font-size:12px;opacity:.85;margin-top:4px}
+  nav{display:flex;flex-wrap:wrap;gap:6px;background:var(--green-d);padding:8px 10px;position:sticky;top:0;z-index:20}
+  nav button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:7px 13px;font-size:13.5px;cursor:pointer;min-height:36px}
+  nav button.active{background:#fff;color:var(--green-d);font-weight:700}
+  main{max-width:1080px;margin:0 auto;padding:14px 12px 60px}
+  .tab{display:none}
+  .tab.active{display:block}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .card .k{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
+  .card .v{font-size:24px;font-weight:700;margin-top:2px}
+  .card .v small{font-size:13px;font-weight:400;color:var(--mut)}
+  .card.alert{border-color:var(--red);background:var(--red-bg)}
+  .card.warn{border-color:var(--amber);background:var(--amber-bg)}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+  .panel h2{margin:0 0 8px;font-size:17px}
+  .panel h3{margin:14px 0 6px;font-size:15px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+section.tab table{display:block;overflow-x:auto;max-width:100%}
+  th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--mut)}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+  .pill{display:inline-block;padding:1px 9px;border-radius:12px;font-size:12px;font-weight:600}
+  .pill.done{background:var(--green-bg);color:var(--green-d)}
+  .pill.due{background:var(--amber-bg);color:var(--amber)}
+  .pill.overdue{background:var(--red-bg);color:var(--red)}
+  .pill.upcoming{background:#eceff1;color:#455a64}
+  .pill.info{background:var(--blue-bg);color:var(--blue)}
+  form.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+  label{font-size:12.5px;color:var(--mut);display:block;margin-bottom:3px}
+  input,select,textarea{width:100%;padding:9px;border:1px solid #b9c6b4;border-radius:7px;font-size:14.5px;background:#fff;min-height:40px}
+  textarea{min-height:64px}
+  .btn{background:var(--green);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:14.5px;cursor:pointer;min-height:42px;font-weight:600}
+  .btn:hover{background:var(--green-d)}
+  .btn.secondary{background:#fff;color:var(--green-d);border:1.5px solid var(--green)}
+  .btn.small{padding:6px 11px;font-size:13px;min-height:34px;min-height:40px;}
+  .btn.danger{background:#fff;color:var(--red);border:1.5px solid var(--red)}
+  .row-actions{display:flex;gap:6px;flex-wrap:wrap}
+  .muted{color:var(--mut);font-size:13px}
+  .empty{padding:18px;text-align:center;color:var(--mut)}
+  .profit-pos{color:var(--green-d);font-weight:700}
+  .profit-neg{color:var(--red);font-weight:700}
+  .flexline{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .notice{background:var(--blue-bg);border:1px solid #bbdefb;border-radius:8px;padding:10px 12px;font-size:13.5px;margin-bottom:12px}
+  .hidden{display:none!important}
+  #printArea{display:none}
+  @media (max-width:560px){
+    header h1{font-size:19px}
+    th,td{padding:6px 5px;font-size:13px}
+    .card .v{font-size:20px}
+  }
+  @media print{
+    body>*{display:none!important}
+    #printArea{display:block!important;font-size:12.5px;color:#000}
+    #printArea table{font-size:12px}
+    #printArea h1{font-size:19px;margin:0 0 2px}
+    #printArea h2{font-size:15px;margin:14px 0 4px}
+    #printArea .sig{margin-top:28px;border-top:1px solid #000;padding-top:4px;width:55%}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🌱 TurfBook</h1>
+  <div class="sub">Lawn Care Season Program &amp; Route Book</div>
+  <div class="seasonline" id="seasonLine"></div>
+</header>
+<nav id="tabBar">
+  <button data-tab="dashboard" class="active">Dashboard</button>
+  <button data-tab="rounds">Rounds Due</button>
+  <button data-tab="properties">Properties</button>
+  <button data-tab="applications">Application Log</button>
+  <button data-tab="mowing">Mowing &amp; Routes</button>
+  <button data-tab="renewals">Renewals</button>
+  <button data-tab="settings">Settings &amp; Help</button>
+</nav>
+<main>
+  <section id="tab-dashboard" class="tab active"></section>
+  <section id="tab-rounds" class="tab"></section>
+  <section id="tab-properties" class="tab"></section>
+  <section id="tab-applications" class="tab"></section>
+  <section id="tab-mowing" class="tab"></section>
+  <section id="tab-renewals" class="tab"></section>
+  <section id="tab-settings" class="tab">
+</section>
+</main>
+<div id="printArea"></div>
+
+<script>
+"use strict";
+/* ============================== TurfBook ==============================
+   Single-file offline season book for lawn care operators:
+   program rounds, application records, mowing routes, per-property
+   P&L, and renewal/prepay tracking. Data lives in localStorage only. */
+
+var LS_KEY = "turfbook_v1";
+
+/* ---------- utilities ---------- */
+function uid(){ return "id" + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function esc(s){
+  return String(s == null ? "" : s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+function num(v){ var n = parseFloat(v); return isNaN(n) ? 0 : n; }
+function nonNeg(v){ var n = num(v); return n < 0 ? 0 : n; }
+function money(n){
+  var neg = n < 0; n = Math.abs(Math.round(n * 100) / 100);
+  var parts = n.toFixed(2).split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return (neg ? "-$" : "$") + parts.join(".");
+}
+function todayStr(){
+  var d = new Date();
+  var m = String(d.getMonth()+1).padStart(2,"0"), day = String(d.getDate()).padStart(2,"0");
+  return d.getFullYear() + "-" + m + "-" + day;
+}
+function fmtDate(s){
+  if(!s) return "—";
+  var p = String(s).split("-"); if(p.length !== 3) return esc(s);
+  var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return months[parseInt(p[1],10)-1] + " " + parseInt(p[2],10) + ", " + p[0];
+}
+function daysBetween(a, b){ // whole days from a to b (date strings)
+  var da = new Date(a + "T12:00:00"), db = new Date(b + "T12:00:00");
+  return Math.round((db - da) / 86400000);
+}
+
+/* ---------- default program ---------- */
+function defaultRounds(year){
+  return [
+    {n:1, name:"Round 1 — Early Spring",  start:year+"-03-01", end:year+"-04-15", work:"Pre-emergent crabgrass control + spring fertilizer"},
+    {n:2, name:"Round 2 — Late Spring",   start:year+"-04-16", end:year+"-05-31", work:"Fertilizer + broadleaf weed control"},
+    {n:3, name:"Round 3 — Summer",        start:year+"-06-01", end:year+"-07-15", work:"Fertilizer + grub control"},
+    {n:4, name:"Round 4 — Late Summer",   start:year+"-07-16", end:year+"-08-31", work:"Fertilizer + spot weed control"},
+    {n:5, name:"Round 5 — Fall",          start:year+"-09-01", end:year+"-10-15", work:"Fall fertilizer + broadleaf cleanup"},
+    {n:6, name:"Round 6 — Winterizer",    start:year+"-10-16", end:year+"-11-30", work:"High-nitrogen winterizer before dormancy"}
+  ];
+}
+function defaultProducts(){
+  return [
+    {id:"prod1", name:"Spring Pre-Emergent Granular (0-0-7)", unit:"lb", cost:1.80},
+    {id:"prod2", name:"Balanced Fertilizer 24-0-11", unit:"lb", cost:1.60},
+    {id:"prod3", name:"Grub Control Granular", unit:"lb", cost:2.40},
+    {id:"prod4", name:"Broadleaf Weed Control (liquid)", unit:"oz", cost:0.90},
+    {id:"prod5", name:"Winterizer 32-0-10", unit:"lb", cost:1.75}
+  ];
+}
+function defaultSettings(year){
+  return {
+    company:"GreenScape Lawn Care", phone:"(555) 014-2200", email:"office@greenscape.example",
+    laborRate:35,          // $ per crew-hour
+    appMinutes:30,         // default minutes for one application visit
+    mowMinutes:45,         // default minutes for one mow visit
+    driveMinutes:10,       // drive time charged per stop
+    seasonYear:year
+  };
+}
+
+/* ---------- demo data ---------- */
+function demoData(){
+  var year = new Date().getFullYear();
+  var S = {
+    settings: defaultSettings(year),
+    rounds: defaultRounds(year),
+    products: defaultProducts(),
+    properties: [
+      {id:"pr1", name:"Johnson",  address:"412 Maple St",        contact:"Mark Johnson",  phone:"(555) 210-4417", sqft:8000,  route:"North", type:"both",    priceRound:65,  priceMow:55, renewal:"renewed",     prepayPct:5, prepaid:true,  notes:"Gate code 4417. Dog in back yard — text before visit."},
+      {id:"pr2", name:"Garcia",   address:"88 Oak Hollow Ln",    contact:"Ana Garcia",    phone:"(555) 882-1093", sqft:12500, route:"North", type:"program", priceRound:85,  priceMow:0,  renewal:"pending",     prepayPct:5, prepaid:false, notes:"Prepay offered, waiting on answer."},
+      {id:"pr3", name:"Nguyen",   address:"2205 Birchwood Dr",   contact:"Linh Nguyen",   phone:"(555) 340-7782", sqft:6200,  route:"North", type:"program", priceRound:58,  priceMow:0,  renewal:"renewed",     prepayPct:0, prepaid:false, notes:""},
+      {id:"pr4", name:"Smith",    address:"17 Country Club Dr",  contact:"Dan Smith",     phone:"(555) 901-3354", sqft:21000, route:"South", type:"both",    priceRound:140, priceMow:95, renewal:"renewed",     prepayPct:5, prepaid:true,  notes:"Estate property — invoice monthly summary."},
+      {id:"pr5", name:"Patel",    address:"930 Willow Creek Rd", contact:"Raj Patel",     phone:"(555) 664-9021", sqft:9750,  route:"South", type:"program", priceRound:72,  priceMow:0,  renewal:"not-renewed", prepayPct:0, prepaid:false, notes:"Said they may switch to DIY next season — save offer sent."},
+      {id:"pr6", name:"Thompson", address:"441 Cedar Ridge Ave", contact:"Sue Thompson",  phone:"(555) 117-6508", sqft:5400,  route:"South", type:"mowing",  priceRound:0,   priceMow:50, renewal:"na",          prepayPct:0, prepaid:false, notes:"Mowing only, every week in season."},
+      {id:"pr7", name:"Baker",    address:"12 Sunset Terrace",   contact:"Tom Baker",     phone:"(555) 555-0186", sqft:15300, route:"North", type:"program", priceRound:105, priceMow:0,  renewal:"pending",     prepayPct:5, prepaid:false, notes:"Renewal letter sent Sep 20. Round 5 held while renewal is decided."},
+      {id:"pr8", name:"Wilson",   address:"777 Lakeview Ct",     contact:"Karen Wilson",  phone:"(555) 429-8810", sqft:11000, route:"South", type:"both",    priceRound:78,  priceMow:68, renewal:"renewed",     prepayPct:0, prepaid:false, notes:""}
+    ],
+    applications: [
+      /* Johnson — hand-verified worked example (see qa-report.md):
+         product 28lb×$1.80 + 24×$1.60 + 20×$2.40 + 24×$1.60 + 28×$1.60 = $220.00 */
+      {id:"a1",  propId:"pr1", round:1, date:year+"-03-10", productId:"prod1", rate:3.5, weather:"58°F, wind 4 mph, dry", tech:"J. Miller", minutes:30, notes:"Full pre-emergent barrier."},
+      {id:"a2",  propId:"pr1", round:2, date:year+"-04-28", productId:"prod2", rate:3.0, weather:"66°F, wind 6 mph", tech:"J. Miller", minutes:30, notes:""},
+      {id:"a3",  propId:"pr1", round:3, date:year+"-06-09", productId:"prod3", rate:2.5, weather:"81°F, calm", tech:"J. Miller", minutes:30, notes:"Grub preventative down before hatch window."},
+      {id:"a4",  propId:"pr1", round:4, date:year+"-07-22", productId:"prod2", rate:3.0, weather:"88°F, wind 3 mph", tech:"J. Miller", minutes:30, notes:""},
+      {id:"a5",  propId:"pr1", round:5, date:year+"-09-14", productId:"prod2", rate:3.5, weather:"74°F, wind 5 mph", tech:"J. Miller", minutes:30, notes:"Fall feed + spot sprayed clover."},
+      /* Garcia — Rounds 1–5 done */
+      {id:"a6",  propId:"pr2", round:1, date:year+"-03-12", productId:"prod1", rate:3.5, weather:"60°F, wind 5 mph", tech:"J. Miller", minutes:40, notes:""},
+      {id:"a7",  propId:"pr2", round:2, date:year+"-04-30", productId:"prod2", rate:3.0, weather:"68°F, calm", tech:"J. Miller", minutes:40, notes:""},
+      {id:"a8",  propId:"pr2", round:3, date:year+"-06-11", productId:"prod3", rate:2.5, weather:"83°F, wind 4 mph", tech:"J. Miller", minutes:40, notes:""},
+      {id:"a9",  propId:"pr2", round:4, date:year+"-07-24", productId:"prod2", rate:3.0, weather:"90°F, wind 6 mph", tech:"J. Miller", minutes:40, notes:""},
+      {id:"a10", propId:"pr2", round:5, date:year+"-09-16", productId:"prod2", rate:3.5, weather:"72°F, wind 3 mph", tech:"J. Miller", minutes:40, notes:""},
+      /* Nguyen — Rounds 1–5 done */
+      {id:"a11", propId:"pr3", round:1, date:year+"-03-11", productId:"prod1", rate:3.5, weather:"59°F, wind 4 mph", tech:"J. Miller", minutes:25, notes:""},
+      {id:"a12", propId:"pr3", round:2, date:year+"-04-29", productId:"prod2", rate:3.0, weather:"67°F, calm", tech:"J. Miller", minutes:25, notes:""},
+      {id:"a13", propId:"pr3", round:3, date:year+"-06-10", productId:"prod3", rate:2.5, weather:"82°F, wind 5 mph", tech:"J. Miller", minutes:25, notes:""},
+      {id:"a14", propId:"pr3", round:4, date:year+"-07-23", productId:"prod2", rate:3.0, weather:"89°F, wind 4 mph", tech:"J. Miller", minutes:25, notes:""},
+      {id:"a15", propId:"pr3", round:5, date:year+"-09-15", productId:"prod2", rate:3.5, weather:"73°F, wind 6 mph", tech:"J. Miller", minutes:25, notes:""},
+      /* Smith — Rounds 1–5 done */
+      {id:"a16", propId:"pr4", round:1, date:year+"-03-13", productId:"prod1", rate:3.5, weather:"61°F, wind 7 mph", tech:"Crew A", minutes:55, notes:"Two passes on the big back lawn."},
+      {id:"a17", propId:"pr4", round:2, date:year+"-05-01", productId:"prod2", rate:3.0, weather:"70°F, calm", tech:"Crew A", minutes:55, notes:""},
+      {id:"a18", propId:"pr4", round:3, date:year+"-06-12", productId:"prod3", rate:2.5, weather:"84°F, wind 5 mph", tech:"Crew A", minutes:55, notes:""},
+      {id:"a19", propId:"pr4", round:4, date:year+"-07-25", productId:"prod2", rate:3.0, weather:"91°F, wind 4 mph", tech:"Crew A", minutes:55, notes:""},
+      {id:"a20", propId:"pr4", round:5, date:year+"-09-17", productId:"prod2", rate:3.5, weather:"75°F, wind 5 mph", tech:"Crew A", minutes:55, notes:""},
+      /* Patel — Rounds 1–4 done, Round 5 MISSED (overdue demo), not renewed */
+      {id:"a21", propId:"pr5", round:1, date:year+"-03-12", productId:"prod1", rate:3.5, weather:"60°F, wind 6 mph", tech:"J. Miller", minutes:35, notes:""},
+      {id:"a22", propId:"pr5", round:2, date:year+"-04-30", productId:"prod2", rate:3.0, weather:"69°F, wind 3 mph", tech:"J. Miller", minutes:35, notes:""},
+      {id:"a23", propId:"pr5", round:3, date:year+"-06-11", productId:"prod3", rate:2.5, weather:"83°F, wind 5 mph", tech:"J. Miller", minutes:35, notes:""},
+      {id:"a24", propId:"pr5", round:4, date:year+"-07-24", productId:"prod2", rate:3.0, weather:"88°F, wind 7 mph", tech:"J. Miller", minutes:35, notes:""},
+      /* Baker — Rounds 1–5 done */
+      {id:"a25", propId:"pr7", round:1, date:year+"-03-13", productId:"prod1", rate:3.5, weather:"61°F, wind 5 mph", tech:"Crew A", minutes:45, notes:""},
+      {id:"a26", propId:"pr7", round:2, date:year+"-05-01", productId:"prod2", rate:3.0, weather:"70°F, wind 4 mph", tech:"Crew A", minutes:45, notes:""},
+      {id:"a27", propId:"pr7", round:3, date:year+"-06-12", productId:"prod3", rate:2.5, weather:"85°F, wind 6 mph", tech:"Crew A", minutes:45, notes:""},
+      {id:"a28", propId:"pr7", round:4, date:year+"-07-25", productId:"prod2", rate:3.0, weather:"90°F, wind 3 mph", tech:"Crew A", minutes:45, notes:""},
+      /* Baker Round 5 intentionally NOT logged — live OVERDUE demo on the dashboard. */
+      /* Wilson — Rounds 1–5 done */
+      {id:"a30", propId:"pr8", round:1, date:year+"-03-10", productId:"prod1", rate:3.5, weather:"58°F, wind 5 mph", tech:"J. Miller", minutes:35, notes:""},
+      {id:"a31", propId:"pr8", round:2, date:year+"-04-28", productId:"prod2", rate:3.0, weather:"66°F, wind 4 mph", tech:"J. Miller", minutes:35, notes:""},
+      {id:"a32", propId:"pr8", round:3, date:year+"-06-09", productId:"prod3", rate:2.5, weather:"81°F, wind 6 mph", tech:"J. Miller", minutes:35, notes:""},
+      {id:"a33", propId:"pr8", round:4, date:year+"-07-22", productId:"prod2", rate:3.0, weather:"87°F, wind 5 mph", tech:"J. Miller", minutes:35, notes:""},
+      {id:"a34", propId:"pr8", round:5, date:year+"-09-14", productId:"prod2", rate:3.5, weather:"73°F, wind 3 mph", tech:"J. Miller", minutes:35, notes:""}
+    ],
+    mows: []
+  };
+  /* Mows — Johnson 10 × 45 min (worked example), Smith 8, Wilson 9, Thompson 12 */
+  var mowDates = ["-04-08","-04-22","-05-06","-05-20","-06-03","-06-17","-07-01","-07-15","-07-29","-08-12"];
+  mowDates.forEach(function(d,i){ S.mows.push({id:"m"+(i+1),  propId:"pr1", date:year+d, minutes:45, notes:""}); });
+  mowDates.slice(0,8).forEach(function(d,i){ S.mows.push({id:"m"+(101+i), propId:"pr4", date:year+d, minutes:70, notes:""}); });
+  mowDates.slice(0,9).forEach(function(d,i){ S.mows.push({id:"m"+(201+i), propId:"pr8", date:year+d, minutes:50, notes:""}); });
+  var thDates = ["-04-06","-04-13","-04-20","-04-27","-05-04","-05-11","-05-18","-05-25","-06-01","-06-08","-06-15","-06-22"];
+  thDates.forEach(function(d,i){ S.mows.push({id:"m"+(301+i), propId:"pr6", date:year+d, minutes:40, notes:""}); });
+  return S;
+}
+
+/* ---------- state ---------- */
+var state = null;
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
+function load(){
+  try{
+    var raw = localStorage.getItem(LS_KEY);
+    if(raw){ state = JSON.parse(raw); if(state && state.settings && state.properties) return; }
+  }catch(e){}
+  state = demoData(); save();
+}
+function propById(id){ for(var i=0;i<state.properties.length;i++) if(state.properties[i].id===id) return state.properties[i]; return null; }
+function productById(id){ for(var i=0;i<state.products.length;i++) if(state.products[i].id===id) return state.products[i]; return null; }
+function roundByN(n){ for(var i=0;i<state.rounds.length;i++) if(state.rounds[i].n===n) return state.rounds[i]; return null; }
+function isProgram(p){ return p.type === "program" || p.type === "both"; }
+function isMowing(p){ return p.type === "mowing" || p.type === "both"; }
+
+/* ================= calculation engine ================= */
+/* Product used for one application: rate is per 1,000 sq ft. */
+function appProductUsed(app, prop){
+  if(!prop) return 0;
+  return nonNeg(app.rate) * (nonNeg(prop.sqft) / 1000);
+}
+function appProductCost(app, prop){
+  var prod = productById(app.productId);
+  if(!prod) return 0;
+  return appProductUsed(app, prop) * nonNeg(prod.cost);
+}
+function visitLaborCost(minutes){
+  return (nonNeg(minutes) / 60) * nonNeg(state.settings.laborRate);
+}
+function visitDriveCost(){
+  return (nonNeg(state.settings.driveMinutes) / 60) * nonNeg(state.settings.laborRate);
+}
+function hasApplication(propId, roundN){
+  for(var i=0;i<state.applications.length;i++)
+    if(state.applications[i].propId===propId && state.applications[i].round===roundN) return state.applications[i];
+  return null;
+}
+/* Status of one round for one property: done | overdue | due | upcoming */
+function roundStatus(prop, round, today){
+  today = today || todayStr();
+  if(hasApplication(prop.id, round.n)) return "done";
+  if(today > round.end) return "overdue";
+  if(today >= round.start) return "due";
+  return "upcoming";
+}
+/* Due list: every program property × round that is due now or overdue. */
+function dueItems(today){
+  today = today || todayStr();
+  var out = [];
+  state.properties.forEach(function(p){
+    if(!isProgram(p) || p.renewal === "not-renewed") return;
+    state.rounds.forEach(function(r){
+      var st = roundStatus(p, r, today);
+      if(st === "due" || st === "overdue") out.push({prop:p, round:r, status:st});
+    });
+  });
+  out.sort(function(a,b){
+    if(a.status !== b.status) return a.status === "overdue" ? -1 : 1;
+    return a.round.end < b.round.end ? -1 : 1;
+  });
+  return out;
+}
+/* Per-property season P&L. Revenue counts completed work only:
+   rounds with an application logged, and mows logged. */
+function propStats(prop){
+  var apps = state.applications.filter(function(a){ return a.propId===prop.id; });
+  var mows = state.mows.filter(function(m){ return m.propId===prop.id; });
+  var productCost = 0, laborMin = 0, i;
+  for(i=0;i<apps.length;i++){ productCost += appProductCost(apps[i], prop); laborMin += nonNeg(apps[i].minutes); }
+  for(i=0;i<mows.length;i++){ laborMin += nonNeg(mows[i].minutes); }
+  var visits = apps.length + mows.length;
+  var laborCost = (laborMin/60) * nonNeg(state.settings.laborRate);
+  var driveCost = visits * visitDriveCost();
+  var revenue = apps.length * nonNeg(prop.priceRound) + mows.length * nonNeg(prop.priceMow);
+  var cost = productCost + laborCost + driveCost;
+  return {
+    roundsDone: apps.length, mowsDone: mows.length, visits: visits,
+    revenue: revenue, productCost: productCost, laborCost: laborCost,
+    driveCost: driveCost, cost: cost, profit: revenue - cost,
+    margin: revenue > 0 ? ((revenue - cost) / revenue) * 100 : 0
+  };
+}
+function routeStats(route){
+  var props = state.properties.filter(function(p){ return p.route === route; });
+  var t = {props:0, revenue:0, cost:0, profit:0, visits:0};
+  props.forEach(function(p){ var s = propStats(p); t.props++; t.revenue+=s.revenue; t.cost+=s.cost; t.profit+=s.profit; t.visits+=s.visits; });
+  t.revPerVisit = t.visits > 0 ? t.revenue / t.visits : 0;
+  return t;
+}
+function allRoutes(){
+  var seen = {}, out = [];
+  state.properties.forEach(function(p){ if(!seen[p.route]){ seen[p.route]=1; out.push(p.route); } });
+  return out.sort();
+}
+/* Season program contract value + prepay math */
+function seasonContractValue(prop){ return nonNeg(prop.priceRound) * state.rounds.length; }
+function prepayPrice(prop){
+  var v = seasonContractValue(prop);
+  return v - v * (nonNeg(prop.prepayPct) / 100);
+}
+function renewalList(){
+  return state.properties.filter(function(p){ return isProgram(p) && p.renewal !== "renewed" && p.renewal !== "na"; });
+}
+
+/* ================= navigation ================= */
+var currentTab = "dashboard";
+document.getElementById("tabBar").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-tab]"); if(!b) return;
+  currentTab = b.getAttribute("data-tab");
+  var btns = document.querySelectorAll("#tabBar button");
+  btns.forEach(function(x){ x.classList.toggle("active", x===b); });
+  document.querySelectorAll(".tab").forEach(function(s){ s.classList.toggle("active", s.id === "tab-" + currentTab); });
+  render();
+});
+function render(){
+  document.getElementById("seasonLine").textContent =
+    esc(state.settings.company) + " · " + state.settings.seasonYear + " season · " +
+    state.properties.length + " properties · data stored on this device only";
+  if(currentTab==="dashboard") renderDashboard();
+  else if(currentTab==="rounds") renderRounds();
+  else if(currentTab==="properties") renderProperties();
+  else if(currentTab==="applications") renderApplications();
+  else if(currentTab==="mowing") renderMowing();
+  else if(currentTab==="renewals") renderRenewals();
+  else if(currentTab==="settings") renderSettings();
+}
+
+/* ================= dashboard ================= */
+function renderDashboard(){
+  var el = document.getElementById("tab-dashboard");
+  var due = dueItems();
+  var overdue = due.filter(function(d){ return d.status==="overdue"; });
+  var ren = renewalList();
+  var totRev=0, totCost=0, totProfit=0;
+  state.properties.forEach(function(p){ var s=propStats(p); totRev+=s.revenue; totCost+=s.cost; totProfit+=s.profit; });
+  var roundsDoneTotal = state.applications.length;
+  var html = "";
+  html += '<div class="cards">'
+    + statCard("Properties", state.properties.length, "")
+    + statCard("Rounds Applied", roundsDoneTotal, "of " + (state.properties.filter(isProgram).length * state.rounds.length) + " program rounds")
+    + statCard("Due / Overdue Now", due.length, "", overdue.length ? "alert" : (due.length ? "warn" : ""))
+    + statCard("Season Revenue", money(totRev), "completed work")
+    + statCard("Season Profit", money(totProfit), totRev>0 ? Math.round(totProfit/totRev*100) + "% margin" : "", totProfit<0 ? "alert" : "")
+    + statCard("Not Renewed Yet", ren.length, "see Renewals tab", ren.length ? "warn" : "")
+    + "</div>";
+  html += '<div class="panel"><div class="flexline"><h2>Needs attention</h2>'
+    + '<button class="btn secondary small" onclick="printDueList()">🖨 Print due list</button></div>';
+  if(!due.length) html += '<div class="empty">Nothing due right now. Every program round inside its window has been applied. 🎉</div>';
+  else {
+    html += '<table><tr><th>Property</th><th>Round</th><th>Window</th><th>Status</th></tr>';
+    due.forEach(function(d){
+      html += "<tr><td><strong>" + esc(d.prop.name) + "</strong><br><span class='muted'>" + esc(d.prop.address) + " · " + esc(d.prop.route) + "</span></td>"
+        + "<td>" + esc(d.round.name) + "</td><td>" + fmtDate(d.round.start) + " – " + fmtDate(d.round.end) + "</td>"
+        + "<td><span class='pill " + d.status + "'>" + d.status.toUpperCase() + "</span></td></tr>";
+    });
+    html += "</table>";
+  }
+  html += "</div>";
+  html += '<div class="panel"><h2>Route profitability (season to date)</h2>';
+  var routes = allRoutes();
+  if(!routes.length) html += '<div class="empty">No routes yet — add a property to get started.</div>';
+  else {
+    html += '<table><tr><th>Route</th><th class="num">Stops</th><th class="num">Visits</th><th class="num">Revenue</th><th class="num">Cost</th><th class="num">Profit</th><th class="num">Rev / visit</th></tr>';
+    routes.forEach(function(r){
+      var s = routeStats(r);
+      html += "<tr><td><strong>" + esc(r) + "</strong></td><td class='num'>" + s.props + "</td><td class='num'>" + s.visits
+        + "</td><td class='num'>" + money(s.revenue) + "</td><td class='num'>" + money(s.cost) + "</td>"
+        + "<td class='num " + (s.profit<0?"profit-neg":"profit-pos") + "'>" + money(s.profit) + "</td><td class='num'>" + money(s.revPerVisit) + "</td></tr>";
+    });
+    html += "</table>";
+  }
+  html += "</div>";
+  el.innerHTML = html;
+}
+function statCard(k, v, sub, cls){
+  return '<div class="card ' + (cls||"") + '"><div class="k">' + esc(k) + '</div><div class="v">' + esc(v) +
+    (sub ? ' <small>' + esc(sub) + '</small>' : "") + "</div></div>";
+}
+
+/* ================= rounds view ================= */
+function renderRounds(){
+  var el = document.getElementById("tab-rounds");
+  var today = todayStr();
+  var html = '<div class="panel"><h2>Program rounds — ' + state.settings.seasonYear + ' season</h2>'
+    + '<p class="muted">Status is per property: <span class="pill done">DONE</span> an application is logged · '
+    + '<span class="pill due">DUE</span> inside the window, not yet applied · '
+    + '<span class="pill overdue">OVERDUE</span> window closed, never applied · '
+    + '<span class="pill upcoming">UPCOMING</span> window has not opened.</p>';
+  state.rounds.forEach(function(r){
+    var prog = state.properties.filter(function(p){ return isProgram(p) && p.renewal !== "not-renewed"; });
+    var doneCount = prog.filter(function(p){ return hasApplication(p.id, r.n); }).length;
+    html += "<h3>" + esc(r.name) + " <span class='muted'>· " + fmtDate(r.start) + " – " + fmtDate(r.end) + " · " + esc(r.work) + " · " + doneCount + "/" + prog.length + " applied</span></h3>";
+    if(!prog.length){ html += '<div class="empty">No program properties.</div>'; return; }
+    html += '<table><tr><th>Property</th><th>Route</th><th>Status</th><th>Applied</th><th></th></tr>';
+    prog.forEach(function(p){
+      var st = roundStatus(p, r, today);
+      var app = hasApplication(p.id, r.n);
+      html += "<tr><td><strong>" + esc(p.name) + "</strong><br><span class='muted'>" + esc(p.address) + "</span></td>"
+        + "<td>" + esc(p.route) + "</td>"
+        + "<td><span class='pill " + st + "'>" + st.toUpperCase() + "</span></td>"
+        + "<td>" + (app ? fmtDate(app.date) : "—") + "</td>"
+        + "<td>" + (app ? "" : "<button class='btn small' onclick=\"quickLog('" + p.id + "'," + r.n + ")\">Log application</button>") + "</td></tr>";
+    });
+    html += "</table>";
+  });
+  html += "</div>";
+  el.innerHTML = html;
+}
+function quickLog(propId, roundN){
+  currentTab = "applications";
+  document.querySelectorAll("#tabBar button").forEach(function(x){ x.classList.toggle("active", x.getAttribute("data-tab")==="applications"); });
+  document.querySelectorAll(".tab").forEach(function(s){ s.classList.toggle("active", s.id === "tab-applications"); });
+  render();
+  var ps = document.getElementById("appProp"); if(ps) ps.value = propId;
+  var rs = document.getElementById("appRound"); if(rs) rs.value = roundN;
+  var f = document.getElementById("appFormPanel"); if(f) f.scrollIntoView({behavior:"smooth"});
+}
+
+/* ================= properties ================= */
+var editingPropId = null;
+function renderProperties(){
+  var el = document.getElementById("tab-properties");
+  var html = '<div class="panel" id="propFormPanel"><h2>' + (editingPropId ? "Edit property" : "Add a property") + '</h2>'
+    + '<form class="grid" onsubmit="saveProperty(event)">'
+    + field("Customer / property name *", '<input id="pName" required maxlength="80">')
+    + field("Street address", '<input id="pAddress" maxlength="120">')
+    + field("Contact person", '<input id="pContact" maxlength="80">')
+    + field("Phone", '<input id="pPhone" maxlength="30">')
+    + field("Treatable sq ft", '<input inputmode="decimal" id="pSqft" type="number" min="0" step="any">')
+    + field("Route", '<input id="pRoute" maxlength="40" placeholder="North">')
+    + field("Service type", '<select id="pType"><option value="program">Program (fert/weed rounds)</option><option value="mowing">Mowing only</option><option value="both">Program + mowing</option></select>')
+    + field("Price per round ($)", '<input inputmode="decimal" id="pPriceRound" type="number" min="0" step="any">')
+    + field("Price per mow ($)", '<input inputmode="decimal" id="pPriceMow" type="number" min="0" step="any">')
+    + field("Renewal status", '<select id="pRenewal"><option value="pending">Pending</option><option value="renewed">Renewed</option><option value="not-renewed">Not renewed</option><option value="na">N/A (no program)</option></select>')
+    + field("Prepay discount %", '<input inputmode="decimal" id="pPrepayPct" type="number" min="0" max="100" step="any">')
+    + field("Prepaid for season?", '<select id="pPrepaid"><option value="no">No</option><option value="yes">Yes — paid</option></select>')
+    + field("Notes", '<textarea id="pNotes" maxlength="500"></textarea>')
+    + '<div><button class="btn" type="submit">' + (editingPropId ? "Save changes" : "Add property") + "</button> "
+    + (editingPropId ? '<button class="btn secondary" type="button" onclick="cancelEditProp()">Cancel</button>' : "")
+    + "</div></form></div>";
+  html += '<div class="panel"><h2>Properties &amp; per-property profit</h2>';
+  if(!state.properties.length) html += '<div class="empty">No properties yet. Add your first one above.</div>';
+  else {
+    html += '<table><tr><th>Property</th><th>Route</th><th class="num">Sq ft</th><th class="num">Rounds</th><th class="num">Mows</th><th class="num">Revenue</th><th class="num">Cost</th><th class="num">Profit</th><th></th></tr>';
+    state.properties.forEach(function(p){
+      var s = propStats(p);
+      html += "<tr><td><strong>" + esc(p.name) + "</strong><br><span class='muted'>" + esc(p.address) + " · " + esc(p.type) + "</span></td>"
+        + "<td>" + esc(p.route) + "</td><td class='num'>" + nonNeg(p.sqft).toLocaleString() + "</td>"
+        + "<td class='num'>" + s.roundsDone + "</td><td class='num'>" + s.mowsDone + "</td>"
+        + "<td class='num'>" + money(s.revenue) + "</td><td class='num'>" + money(s.cost) + "</td>"
+        + "<td class='num " + (s.profit<0?"profit-neg":"profit-pos") + "'>" + money(s.profit) + "</td>"
+        + "<td><div class='row-actions'><button class='btn secondary small' onclick=\"editProperty('" + p.id + "')\">Edit</button>"
+        + "<button class='btn danger small' onclick=\"deleteProperty('" + p.id + "')\">Delete</button></div></td></tr>";
+    });
+    html += "</table>"
+      + '<p class="muted">Cost = product used (rate × sq ft ÷ 1,000 × your product cost) + labor (visit minutes × your labor rate) + drive time per stop. Revenue counts completed rounds and mows only.</p>';
+  }
+  html += "</div>";
+  el.innerHTML = html;
+  if(editingPropId){
+    var p = propById(editingPropId);
+    if(p){
+      setV("pName", p.name); setV("pAddress", p.address); setV("pContact", p.contact); setV("pPhone", p.phone);
+      setV("pSqft", p.sqft); setV("pRoute", p.route); setV("pType", p.type);
+      setV("pPriceRound", p.priceRound); setV("pPriceMow", p.priceMow); setV("pRenewal", p.renewal);
+      setV("pPrepayPct", p.prepayPct); setV("pPrepaid", p.prepaid ? "yes" : "no"); setV("pNotes", p.notes);
+    }
+  }
+}
+function field(label, control){ return "<div><label>" + esc(label) + "</label>" + control + "</div>"; }
+function setV(id, v){ var n = document.getElementById(id); if(n) n.value = (v == null ? "" : v); }
+function getV(id){ var n = document.getElementById(id); return n ? n.value.trim() : ""; }
+function saveProperty(e){
+  e.preventDefault();
+  var name = getV("pName");
+  if(!name){ alert("Give the property a name."); return; }
+  var data = {
+    name: name, address: getV("pAddress"), contact: getV("pContact"), phone: getV("pPhone"),
+    sqft: nonNeg(getV("pSqft")), route: getV("pRoute") || "Main", type: getV("pType"),
+    priceRound: nonNeg(getV("pPriceRound")), priceMow: nonNeg(getV("pPriceMow")),
+    renewal: getV("pRenewal"), prepayPct: Math.min(100, nonNeg(getV("pPrepayPct"))),
+    prepaid: getV("pPrepaid") === "yes", notes: getV("pNotes")
+  };
+  if(editingPropId){
+    var p = propById(editingPropId);
+    if(p){ for(var k in data) p[k] = data[k]; }
+    editingPropId = null;
+  } else {
+    data.id = uid();
+    state.properties.push(data);
+  }
+  save(); render();
+}
+function editProperty(id){ editingPropId = id; render(); var f=document.getElementById("propFormPanel"); if(f) f.scrollIntoView({behavior:"smooth"}); }
+function cancelEditProp(){ editingPropId = null; render(); }
+function deleteProperty(id){
+  var p = propById(id); if(!p) return;
+  if(!confirm("Delete " + p.name + " and all its application/mowing records? This cannot be undone.")) return;
+  state.properties = state.properties.filter(function(x){ return x.id !== id; });
+  state.applications = state.applications.filter(function(x){ return x.propId !== id; });
+  state.mows = state.mows.filter(function(x){ return x.propId !== id; });
+  if(editingPropId === id) editingPropId = null;
+  save(); render();
+}
+
+/* ================= applications ================= */
+function renderApplications(){
+  var el = document.getElementById("tab-applications");
+  var progProps = state.properties.filter(isProgram);
+  var html = '<div class="panel" id="appFormPanel"><h2>Log an application</h2>'
+    + '<p class="muted">This is the record a state inspector asks for: what went down, where, at what rate, in what weather, by whom. Fill it in at the truck, not from memory at night.</p>'
+    + '<form class="grid" onsubmit="saveApplication(event)">'
+    + field("Property *", '<select id="appProp" required>' + progProps.map(function(p){ return '<option value="' + p.id + '">' + esc(p.name) + " — " + esc(p.address) + "</option>"; }).join("") + "</select>")
+    + field("Round *", '<select id="appRound" required>' + state.rounds.map(function(r){ return '<option value="' + r.n + '">' + esc(r.name) + "</option>"; }).join("") + "</select>")
+    + field("Date *", '<input id="appDate" type="date" required value="' + todayStr() + '">')
+    + field("Product *", '<select id="appProduct" required>' + state.products.map(function(pr){ return '<option value="' + pr.id + '">' + esc(pr.name) + " (" + money(nonNeg(pr.cost)) + "/" + esc(pr.unit) + ")</option>"; }).join("") + "</select>")
+    + field("Rate per 1,000 sq ft", '<input inputmode="decimal" id="appRate" type="number" min="0" step="any" value="3.0">')
+    + field("Weather (temp / wind / conditions)", '<input id="appWeather" maxlength="80" placeholder="72°F, wind 5 mph, dry">')
+    + field("Technician", '<input id="appTech" maxlength="60">')
+    + field("Minutes on site", '<input inputmode="decimal" id="appMinutes" type="number" min="0" step="any" value="' + nonNeg(state.settings.appMinutes) + '">')
+    + field("Notes", '<input id="appNotes" maxlength="300">')
+    + '<div><button class="btn" type="submit">Save application</button></div></form></div>';
+  html += '<div class="panel"><div class="flexline"><h2>Application records</h2>'
+    + '<button class="btn secondary small" onclick="printAppRecords()">🖨 Print application records</button></div>';
+  if(!state.applications.length) html += '<div class="empty">No applications logged yet this season.</div>';
+  else {
+    var apps = state.applications.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+    html += '<table><tr><th>Date</th><th>Property</th><th>Round</th><th>Product</th><th class="num">Rate</th><th class="num">Used</th><th class="num">Prod. cost</th><th>Tech</th><th></th></tr>';
+    apps.forEach(function(a){
+      var p = propById(a.propId), prod = productById(a.productId), r = roundByN(a.round);
+      html += "<tr><td>" + fmtDate(a.date) + "</td><td><strong>" + esc(p ? p.name : "(deleted)") + "</strong></td>"
+        + "<td>" + esc(r ? r.name.split(" — ")[0] : "Round " + a.round) + "</td>"
+        + "<td>" + esc(prod ? prod.name : "?") + "</td>"
+        + "<td class='num'>" + nonNeg(a.rate) + "</td>"
+        + "<td class='num'>" + appProductUsed(a, p || {sqft:0}).toFixed(1) + " " + esc(prod ? prod.unit : "") + "</td>"
+        + "<td class='num'>" + money(appProductCost(a, p || {sqft:0})) + "</td>"
+        + "<td>" + esc(a.tech) + "</td>"
+        + "<td><button class='btn danger small' onclick=\"deleteApplication('" + a.id + "')\">Delete</button></td></tr>";
+    });
+    html += "</table>";
+  }
+  html += "</div>";
+  el.innerHTML = html;
+}
+function saveApplication(e){
+  e.preventDefault();
+  var propId = getV("appProp");
+  if(!propById(propId)){ alert("Pick a property first."); return; }
+  state.applications.push({
+    id: uid(), propId: propId, round: parseInt(getV("appRound"),10) || 1,
+    date: getV("appDate") || todayStr(), productId: getV("appProduct"),
+    rate: nonNeg(getV("appRate")), weather: getV("appWeather"), tech: getV("appTech"),
+    minutes: nonNeg(getV("appMinutes")), notes: getV("appNotes")
+  });
+  save(); render();
+}
+function deleteApplication(id){
+  if(!confirm("Delete this application record?")) return;
+  state.applications = state.applications.filter(function(a){ return a.id !== id; });
+  save(); render();
+}
+
+/* ================= mowing & routes ================= */
+function renderMowing(){
+  var el = document.getElementById("tab-mowing");
+  var mowProps = state.properties.filter(isMowing);
+  var html = '<div class="panel"><h2>Log a mow visit</h2>'
+    + '<form class="grid" onsubmit="saveMow(event)">'
+    + field("Property *", '<select id="mowProp" required>' + mowProps.map(function(p){ return '<option value="' + p.id + '">' + esc(p.name) + " — " + esc(p.address) + "</option>"; }).join("") + "</select>")
+    + field("Date *", '<input id="mowDate" type="date" required value="' + todayStr() + '">')
+    + field("Minutes on site", '<input inputmode="decimal" id="mowMinutes" type="number" min="0" step="any" value="' + nonNeg(state.settings.mowMinutes) + '">')
+    + field("Notes", '<input id="mowNotes" maxlength="300">')
+    + '<div><button class="btn" type="submit">Save mow</button></div></form></div>';
+  html += '<div class="panel"><h2>Route sheets</h2>';
+  var routes = allRoutes();
+  if(!routes.length) html += '<div class="empty">No routes yet.</div>';
+  routes.forEach(function(r){
+    var props = state.properties.filter(function(p){ return p.route === r; });
+    var s = routeStats(r);
+    html += "<h3>" + esc(r) + " route <span class='muted'>· " + props.length + " stops · " + money(s.profit) + " season profit</span> "
+      + "<button class='btn secondary small' onclick=\"printRouteSheet('" + esc(r.replace(/\\/g,"\\\\").replace(/'/g,"\\'")) + "')\">🖨 Print route sheet</button></h3>"
+      + '<table><tr><th>Stop</th><th>Address</th><th>Contact</th><th>Notes</th></tr>';
+    props.forEach(function(p, i){
+      html += "<tr><td>" + (i+1) + ". <strong>" + esc(p.name) + "</strong></td><td>" + esc(p.address) + "</td><td>" + esc(p.contact) + "<br><span class='muted'>" + esc(p.phone) + "</span></td><td>" + esc(p.notes) + "</td></tr>";
+    });
+    html += "</table>";
+  });
+  html += "</div>";
+  html += '<div class="panel"><h2>Recent mows</h2>';
+  if(!state.mows.length) html += '<div class="empty">No mows logged yet.</div>';
+  else {
+    var mows = state.mows.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; }).slice(0, 40);
+    html += '<table><tr><th>Date</th><th>Property</th><th class="num">Minutes</th><th>Notes</th><th></th></tr>';
+    mows.forEach(function(m){
+      var p = propById(m.propId);
+      html += "<tr><td>" + fmtDate(m.date) + "</td><td><strong>" + esc(p ? p.name : "(deleted)") + "</strong></td>"
+        + "<td class='num'>" + nonNeg(m.minutes) + "</td><td>" + esc(m.notes) + "</td>"
+        + "<td><button class='btn danger small' onclick=\"deleteMow('" + m.id + "')\">Delete</button></td></tr>";
+    });
+    html += "</table>";
+  }
+  html += "</div>";
+  el.innerHTML = html;
+}
+function saveMow(e){
+  e.preventDefault();
+  var propId = getV("mowProp");
+  if(!propById(propId)){ alert("Pick a property first."); return; }
+  state.mows.push({ id: uid(), propId: propId, date: getV("mowDate") || todayStr(), minutes: nonNeg(getV("mowMinutes")), notes: getV("mowNotes") });
+  save(); render();
+}
+function deleteMow(id){
+  if(!confirm("Delete this mow record?")) return;
+  state.mows = state.mows.filter(function(m){ return m.id !== id; });
+  save(); render();
+}
+
+/* ================= renewals ================= */
+function renderRenewals(){
+  var el = document.getElementById("tab-renewals");
+  var prog = state.properties.filter(isProgram);
+  var html = '<div class="panel"><div class="flexline"><h2>Season contracts &amp; renewals</h2>'
+    + '<button class="btn secondary small" onclick="printRenewalList()">🖨 Print “not renewed” call list</button></div>'
+    + '<p class="muted">Season value = price per round × ' + state.rounds.length + ' rounds. Prepay discount is tracked per customer — mark who actually paid up front so season-end reconciliation takes minutes, not an evening.</p>';
+  if(!prog.length) html += '<div class="empty">No program properties yet.</div>';
+  else {
+    html += '<table><tr><th>Customer</th><th class="num">Season value</th><th class="num">Prepay price</th><th>Prepaid?</th><th>Renewal</th></tr>';
+    prog.forEach(function(p){
+      html += "<tr><td><strong>" + esc(p.name) + "</strong><br><span class='muted'>" + esc(p.address) + " · " + esc(p.phone) + "</span></td>"
+        + "<td class='num'>" + money(seasonContractValue(p)) + "</td>"
+        + "<td class='num'>" + (nonNeg(p.prepayPct) > 0 ? money(prepayPrice(p)) + " <span class='muted'>(−" + nonNeg(p.prepayPct) + "%)</span>" : "—") + "</td>"
+        + "<td>" + (p.prepaid ? "<span class='pill done'>PAID</span>" : "<span class='pill info'>NO</span>") + "</td>"
+        + "<td><select onchange=\"setRenewal('" + p.id + "', this.value)\">"
+        + ["renewed","pending","not-renewed","na"].map(function(v){
+            var lbl = v==="renewed" ? "✅ Renewed" : v==="pending" ? "⏳ Pending" : v==="not-renewed" ? "❌ Not renewed" : "N/A";
+            return '<option value="' + v + '"' + (p.renewal===v ? " selected" : "") + ">" + lbl + "</option>";
+          }).join("") + "</select></td></tr>";
+    });
+    html += "</table>";
+  }
+  html += "</div>";
+  var open = renewalList();
+  html += '<div class="panel"><h2>Who hasn’t renewed (' + open.length + ")</h2>";
+  if(!open.length) html += '<div class="empty">Every program customer has renewed. 🎉</div>';
+  else {
+    html += '<table><tr><th>Customer</th><th>Phone</th><th>Status</th><th class="num">Season value at risk</th></tr>';
+    var atRisk = 0;
+    open.forEach(function(p){
+      atRisk += seasonContractValue(p);
+      html += "<tr><td><strong>" + esc(p.name) + "</strong><br><span class='muted'>" + esc(p.address) + "</span></td><td>" + esc(p.phone)
+        + "</td><td><span class='pill " + (p.renewal==="not-renewed" ? "overdue" : "due") + "'>" + esc(p.renewal.replace("-"," ").toUpperCase()) + "</span></td>"
+        + "<td class='num'>" + money(seasonContractValue(p)) + "</td></tr>";
+    });
+    html += "</table><p><strong>Total season value not yet renewed: " + money(atRisk) + "</strong></p>";
+  }
+  html += "</div>";
+  el.innerHTML = html;
+}
+function setRenewal(id, v){
+  var p = propById(id); if(!p) return;
+  p.renewal = v; save(); render();
+}
+
+/* ================= settings ================= */
+function renderSettings(){
+  var el = document.getElementById("tab-settings");
+  var s = state.settings;
+  var html = '<div class="panel"><h2>Company &amp; rates</h2>'
+    + '<form class="grid" onsubmit="saveSettings(event)">'
+    + field("Company name", '<input id="sCompany" maxlength="80">')
+    + field("Phone", '<input id="sPhone" maxlength="30">')
+    + field("Email", '<input id="sEmail" maxlength="80">')
+    + field("Labor rate ($ per crew-hour)", '<input inputmode="decimal" id="sLabor" type="number" min="0" step="any">')
+    + field("Default application minutes", '<input inputmode="decimal" id="sAppMin" type="number" min="0" step="any">')
+    + field("Default mow minutes", '<input inputmode="decimal" id="sMowMin" type="number" min="0" step="any">')
+    + field("Drive minutes per stop", '<input inputmode="decimal" id="sDrive" type="number" min="0" step="any">')
+    + field("Season year", '<input inputmode="decimal" id="sYear" type="number" min="2000" max="2100" step="1">')
+    + '<div><button class="btn" type="submit">Save settings</button></div></form>'
+    + '<p class="muted">Labor and drive rates feed every profit number in the app. Be honest with them — a route that only “profits” at $0 drive time is lying to you.</p></div>';
+
+  html += '<div class="panel"><h2>Products &amp; costs</h2>'
+    + '<form class="grid" onsubmit="addProduct(event)">'
+    + field("Product name", '<input id="npName" required maxlength="80" placeholder="e.g. Fertilizer 18-24-12">')
+    + field("Unit", '<input id="npUnit" required maxlength="10" placeholder="lb / oz / gal">')
+    + field("Your cost per unit ($)", '<input inputmode="decimal" id="npCost" type="number" min="0" step="any" required>')
+    + '<div><button class="btn" type="submit">Add product</button></div></form>';
+  if(!state.products.length) html += '<div class="empty">No products yet.</div>';
+  else {
+    html += '<table><tr><th>Product</th><th>Unit</th><th class="num">Cost / unit</th><th></th></tr>';
+    state.products.forEach(function(pr){
+      html += "<tr><td>" + esc(pr.name) + "</td><td>" + esc(pr.unit) + "</td><td class='num'>" + money(nonNeg(pr.cost)) + "</td>"
+        + "<td><button class='btn danger small' onclick=\"deleteProduct('" + pr.id + "')\">Delete</button></td></tr>";
+    });
+    html += "</table>";
+  }
+  html += "</div>";
+
+  html += '<div class="panel"><h2>Program rounds</h2>'
+    + '<p class="muted">Rename rounds or move the windows to match your climate. Windows drive every Due/Overdue flag in the app.</p>'
+    + '<table><tr><th>Round</th><th>Window start</th><th>Window end</th><th>Work</th><th></th></tr>';
+  state.rounds.forEach(function(r, i){
+    html += "<tr><td><input id='rdName" + i + "' value='" + esc(r.name) + "'></td>"
+      + "<td><input id='rdStart" + i + "' type='date' value='" + esc(r.start) + "'></td>"
+      + "<td><input id='rdEnd" + i + "' type='date' value='" + esc(r.end) + "'></td>"
+      + "<td><input id='rdWork" + i + "' value='" + esc(r.work) + "'></td>"
+      + "<td><button class='btn secondary small' onclick='saveRound(" + i + ")'>Save</button></td></tr>";
+  });
+  html += "</table></div>";
+
+  html += '<div class="panel"><h2>Backup &amp; data</h2>'
+    + '<p class="muted">Your data lives in this browser’s local storage on this device — nothing is uploaded anywhere. Export a backup before switching devices or clearing browser data.</p>'
+    + '<div class="row-actions">'
+    + '<button class="btn secondary" onclick="exportData()">⬇ Export backup (JSON)</button>'
+    + '<label class="btn secondary" style="display:inline-flex;align-items:center;cursor:pointer">⬆ Import backup<input type="file" accept=".json,application/json" class="hidden" onchange="importData(event)"></label>'
+    + '<button class="btn secondary" onclick="loadDemo()">Reload demo data</button>'
+    + '<button class="btn secondary" onclick="clearDemoOnly()">Clear demo data only</button>'
+    + '<button class="btn danger" onclick="clearAll()">Clear all data (start empty)</button>'
+    + "</div></div>";
+
+  html += '<div class="panel"><h2>How TurfBook works</h2>'
+    + '<p><strong>The season at a glance.</strong> The Dashboard shows which rounds are due or overdue right now, season revenue and profit from completed work, and which routes actually make money per visit.</p>'
+    + '<p><strong>Rounds.</strong> Your program is a series of timed rounds (default: 6, early spring through winterizer). Log the application when you make it and TurfBook marks that round done for that property. Miss the window and it flags red — while there is still time to fix it, not at season-end.</p>'
+    + '<p><strong>Application records.</strong> Every log entry captures product, rate per 1,000 sq ft, total product used, weather, and technician — the paper trail state regulators and careful customers expect. Print the full record set from the Application Log tab.</p>'
+    + '<p><strong>Profit.</strong> Per property: revenue (completed rounds × your price + mows × your price) minus product cost, labor, and drive time. If a property quietly loses money, you will see it here first.</p>'
+    + '<p><strong>Renewals.</strong> Track who renewed, who is pending, who prepaid (and at what discount), and print the “not renewed” list as your call sheet before next season’s routes are built.</p>'
+    + '<p class="muted">Honest limits: TurfBook is a record book, not a pesticide-compliance service — follow your state’s label and record-keeping law for what must be captured. It does not send invoices or texts, take payments, or sync between devices; use Export/Import to move your book.</p></div>';
+  el.innerHTML = html + '<div id="legalSection"></div>';
+  setV("sCompany", s.company); setV("sPhone", s.phone); setV("sEmail", s.email);
+  setV("sLabor", s.laborRate); setV("sAppMin", s.appMinutes); setV("sMowMin", s.mowMinutes);
+  setV("sDrive", s.driveMinutes); setV("sYear", s.seasonYear);
+}
+function saveSettings(e){
+  e.preventDefault();
+  var s = state.settings;
+  s.company = getV("sCompany") || s.company; s.phone = getV("sPhone"); s.email = getV("sEmail");
+  s.laborRate = nonNeg(getV("sLabor")); s.appMinutes = nonNeg(getV("sAppMin"));
+  s.mowMinutes = nonNeg(getV("sMowMin")); s.driveMinutes = nonNeg(getV("sDrive"));
+  var y = parseInt(getV("sYear"),10); if(y >= 2000 && y <= 2100) s.seasonYear = y;
+  save(); render();
+}
+function addProduct(e){
+  e.preventDefault();
+  var name = getV("npName"); if(!name){ alert("Name the product."); return; }
+  state.products.push({ id: uid(), name: name, unit: getV("npUnit") || "lb", cost: nonNeg(getV("npCost")) });
+  save(); render();
+}
+function deleteProduct(id){
+  var used = state.applications.some(function(a){ return a.productId === id; });
+  if(used && !confirm("This product appears in application records. Deleting it leaves those records without a product cost. Delete anyway?")) return;
+  if(!used && !confirm("Delete this product?")) return;
+  state.products = state.products.filter(function(p){ return p.id !== id; });
+  save(); render();
+}
+function saveRound(i){
+  var r = state.rounds[i]; if(!r) return;
+  var name = getV("rdName" + i), start = getV("rdStart" + i), end = getV("rdEnd" + i), work = getV("rdWork" + i);
+  var newStart = start || r.start, newEnd = end || r.end;
+  if(newEnd < newStart){ alert("Window end is before window start — fix the dates."); return; }
+  if(name) r.name = name;
+  r.start = newStart; r.end = newEnd;
+  r.work = work;
+  save(); render();
+}
+function exportData(){
+  var blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "turfbook-backup-" + todayStr() + ".json";
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+}
+function importData(ev){
+  var file = ev.target.files && ev.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(){
+    try{
+      var data = JSON.parse(reader.result);
+      if(!data || !data.settings || !Array.isArray(data.properties) || !Array.isArray(data.applications) || !Array.isArray(data.rounds) || !Array.isArray(data.products))
+        throw new Error("shape");
+      state = data; save(); render();
+      alert("Backup imported.");
+    }catch(err){
+      alert("That file could not be imported — it is not a valid TurfBook backup. Your current data was not changed.");
+    }
+  };
+  reader.onerror = function(){ alert("Could not read that file. Your current data was not changed."); };
+  reader.readAsText(file);
+}
+function loadDemo(){
+  if(!confirm("Replace ALL current data with the demo data?")) return;
+  state = demoData(); save(); editingPropId = null; render();
+}
+function clearDemoOnly(){
+  var demo = demoData();
+  var propIds = {}; demo.properties.forEach(function(p){ propIds[p.id] = 1; });
+  var appIds = {}; demo.applications.forEach(function(a){ appIds[a.id] = 1; });
+  var mowIds = {}; demo.mows.forEach(function(m){ mowIds[m.id] = 1; });
+  var np = state.properties.filter(function(p){ return propIds[p.id]; }).length;
+  var na = state.applications.filter(function(a){ return appIds[a.id] || propIds[a.propId]; }).length;
+  var nm = state.mows.filter(function(m){ return mowIds[m.id] || propIds[m.propId]; }).length;
+  var n = np + na + nm;
+  if(!n){ alert("No demo data found — nothing was removed. Every record in the book is yours."); return; }
+  if(!confirm("Clear the demo data only (" + np + " sample properties, " + na + " applications, " + nm + " mows)? Your own properties and records — and your products, rounds, and settings — stay.")) return;
+  state.properties = state.properties.filter(function(p){ return !propIds[p.id]; });
+  state.applications = state.applications.filter(function(a){ return !(appIds[a.id] || propIds[a.propId]); });
+  state.mows = state.mows.filter(function(m){ return !(mowIds[m.id] || propIds[m.propId]); });
+  if(editingPropId && propIds[editingPropId]) editingPropId = null;
+  save(); render();
+}
+function clearAll(){
+  if(!confirm("Clear ALL data and start with an empty book? Export a backup first if you need this data.")) return;
+  var year = new Date().getFullYear();
+  state = { settings: defaultSettings(year), rounds: defaultRounds(year), products: defaultProducts(), properties: [], applications: [], mows: [] };
+  state.settings.company = "My Lawn Care Co.";
+  save(); editingPropId = null; render();
+}
+
+/* ================= printing ================= */
+function printDoc(title, bodyHtml){
+  var pa = document.getElementById("printArea");
+  pa.innerHTML = "<h1>" + esc(state.settings.company) + "</h1>"
+    + "<div>" + esc(state.settings.phone) + (state.settings.email ? " · " + esc(state.settings.email) : "") + "</div>"
+    + "<h2>" + esc(title) + " — " + fmtDate(todayStr()) + "</h2>" + bodyHtml;
+  window.print();
+}
+function printDueList(){
+  var due = dueItems();
+  if(!due.length){ alert("Nothing is due right now."); return; }
+  var html = '<table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;width:100%"><tr><th>Property</th><th>Address</th><th>Round</th><th>Window ends</th><th>Status</th><th>Done ✓</th></tr>';
+  due.forEach(function(d){
+    html += "<tr><td>" + esc(d.prop.name) + "</td><td>" + esc(d.prop.address) + "</td><td>" + esc(d.round.name) + "</td><td>" + fmtDate(d.round.end) + "</td><td>" + d.status.toUpperCase() + "</td><td></td></tr>";
+  });
+  printDoc("Rounds due list", html + "</table>");
+}
+function printAppRecords(){
+  if(!state.applications.length){ alert("No application records to print yet."); return; }
+  var apps = state.applications.slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; });
+  var html = '<table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;width:100%"><tr><th>Date</th><th>Property / Address</th><th>Round</th><th>Product</th><th>Rate /1k</th><th>Area (sq ft)</th><th>Total used</th><th>Weather</th><th>Tech</th></tr>';
+  apps.forEach(function(a){
+    var p = propById(a.propId), prod = productById(a.productId), r = roundByN(a.round);
+    html += "<tr><td>" + fmtDate(a.date) + "</td><td>" + esc(p ? p.name + " — " + p.address : "?") + "</td><td>" + esc(r ? r.name : a.round)
+      + "</td><td>" + esc(prod ? prod.name : "?") + "</td><td>" + nonNeg(a.rate) + "</td><td>" + (p ? nonNeg(p.sqft).toLocaleString() : "?")
+      + "</td><td>" + appProductUsed(a, p || {sqft:0}).toFixed(1) + " " + esc(prod ? prod.unit : "") + "</td><td>" + esc(a.weather) + "</td><td>" + esc(a.tech) + "</td></tr>";
+  });
+  html += "</table><p>Records generated by TurfBook. Retain per your state's pesticide record-keeping requirements.</p>";
+  printDoc("Pesticide / fertilizer application records — " + state.settings.seasonYear, html);
+}
+function printRouteSheet(route){
+  var props = state.properties.filter(function(p){ return p.route === route; });
+  if(!props.length){ alert("That route has no stops."); return; }
+  var html = '<table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;width:100%"><tr><th>#</th><th>Property</th><th>Address</th><th>Contact / Phone</th><th>Service</th><th>Notes</th><th>Done ✓</th></tr>';
+  props.forEach(function(p, i){
+    html += "<tr><td>" + (i+1) + "</td><td>" + esc(p.name) + "</td><td>" + esc(p.address) + "</td><td>" + esc(p.contact) + " " + esc(p.phone)
+      + "</td><td>" + esc(p.type) + "</td><td>" + esc(p.notes) + "</td><td></td></tr>";
+  });
+  printDoc(route + " route sheet", html + "</table>");
+}
+function printRenewalList(){
+  var open = renewalList();
+  if(!open.length){ alert("Everyone has renewed — no call list needed."); return; }
+  var html = '<table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;width:100%"><tr><th>Customer</th><th>Address</th><th>Phone</th><th>Status</th><th>Season value</th><th>Result of call</th></tr>';
+  open.forEach(function(p){
+    html += "<tr><td>" + esc(p.name) + "</td><td>" + esc(p.address) + "</td><td>" + esc(p.phone) + "</td><td>" + esc(p.renewal) + "</td><td>" + money(seasonContractValue(p)) + "</td><td></td></tr>";
+  });
+  printDoc("Renewal call list — next season", html + "</table>");
+}
+
+/* ================= init ================= */
+load();
+render();
+
+/* ================= Legal — Terms of Use acceptance (catalog pattern v1.0) ================= */
+var TERMS_VERSION = "1.0";
+var LEGAL_APP_NAME = "TurfBook";
+var LEGAL_HAS_DISCLAIMER = true;
+var LEGAL_TERMS_HTML = "<h3>Terms of Use \u2014 White Wolf Digital Apps</h3><p><b>Version 1.0 (DRAFT \u2014 pending attorney review)</b></p><p><b>Seller: White Wolf Tree Service LLC, selling digital products under the name \"White Wolf Digital\"</b></p><p><b>Contact: whitewolfoklahoma@gmail.com</b></p><h4>1. What you're buying</h4><p>Our apps (including ForgeFit AI, ForgeKitchen, TreeBid Pro, SnowBid,</p><p>WashPrice Pro, RoofSquares, JobProfit Tracker, PastureLedger, and the other</p><p>titles sold under White Wolf Digital) are single-file software tools. When</p><p>you buy one, you are buying a <b>license to use the file</b>, not ownership of</p><p>the software itself.</p><h4>2. Your license</h4><ul><li>You may use the app for your own personal or business work.</li><li>You may open it on your own devices (phone, tablet, computer) and move your</li></ul><p>  own data between them using the app's built-in backup/export tools.</p><ul><li>You may <b>not</b> resell, redistribute, give away, upload, or share the app</li></ul><p>  file (or a copy of it) with anyone else \u2014 including posting it online,</p><p>  bundling it with other products, or selling access to it.</p><ul><li>You may <b>not</b> claim the app as your own work, remove its branding or</li></ul><p>  notices, or use it to build a competing product for resale.</p><ul><li>One purchase = one buyer. A business purchase covers the buyer and their</li></ul><p>  own employees using it for that business's work; it does not cover other</p><p>  businesses.</p><h4>3. Your data stays yours \u2014 and stays on your device</h4><ul><li>The current versions of our apps run <b>entirely on your device</b>. They have</li></ul><p>  no accounts, no sign-in, no analytics, and they collect, transmit, and store</p><p>  <b>none</b> of your information on any server. We never see your data.</p><ul><li>Your records are stored in your browser/app storage on your device. **You</li></ul><p>  are responsible for backing them up** using the app's export tools. If you</p><p>  clear your browser data, lose your device, or uninstall the app, your</p><p>  records may be permanently lost, and we cannot recover them \u2014 we never had</p><p>  a copy.</p><ul><li>Files you export (backups, quotes, PDFs) are under your control. Where you</li></ul><p>  store or send them is up to you.</p><h4>4. Estimates are tools, not guarantees</h4><p>Every number our apps produce \u2014 bids, prices, costs, calorie targets,</p><p>projections, schedules, totals \u2014 is an **estimate generated from the</p><p>information you enter and the settings you choose**. Outputs are aids for</p><p>your own judgment, not guarantees of price, profit, outcome, or result. You</p><p>are responsible for checking any output before relying on it (see also the</p><p>disclaimer that applies to your app: Health Disclaimer for fitness/nutrition</p><p>apps, Estimator Disclaimer for contractor tools). If an input is wrong, the</p><p>output will be wrong.</p><h4>5. Acceptable use</h4><p>Don't use the apps to break the law, infringe anyone's rights, or</p><p>misrepresent quotes, invoices, or records to your own customers. For the</p><p>fitness apps, the guardrails in the app (healthy-rate limits, calorie floor)</p><p>are part of the product \u2014 don't treat the app as a way around them.</p><h4>6. Provided \"as is\"</h4><p>The apps are provided **\"as is\" and \"as available,\" without warranties of</p><p>any kind**, express or implied \u2014 including merchantability, fitness for a</p><p>particular purpose, accuracy of calculations, and uninterrupted or</p><p>error-free operation \u2014 to the maximum extent allowed by law. Software has</p><p>bugs; browsers change; we work to fix problems but do not promise any app is</p><p>error-free or will work on every device or browser forever.</p><h4>7. Limitation of liability</h4><p>To the maximum extent allowed by law:</p><ul><li>We are **not liable for indirect, incidental, special, or consequential</li></ul><p>  damages** \u2014 including lost profits, lost or mispriced jobs, lost data, or</p><p>  business interruption \u2014 arising from use of the apps.</p><ul><li>Our total liability for any claim connected to an app is limited to the</li></ul><p>  <b>amount you paid for that app</b>.</p><ul><li>Nothing in these terms limits liability that cannot legally be limited.</li></ul><h4>8. Refunds</h4><p>Refunds are handled **by the storefront you bought from, under that</p><p>storefront's policy** \u2014 Gumroad's refund policy for Gumroad purchases, and</p><p>Google Play's refund policy for Play purchases. These terms do not add to,</p><p>replace, or override the storefront's refund rules. If a file is defective</p><p>and won't open, contact us at whitewolfoklahoma@gmail.com and we'll fix or</p><p>replace the file.</p><h4>9. Updates and changes to these terms</h4><ul><li>We may release updated versions of an app. Updates may add, change, or</li></ul><p>  remove features.</p><ul><li>We may update these terms. The version you agreed to is recorded in the</li></ul><p>  app (version number and date) at first-run acceptance. If terms change,</p><p>  the app may ask you to accept the new version once on next open. Updated</p><p>  terms apply going forward, not retroactively.</p><ul><li>If you don't agree to an updated version of the terms, stop using the app.</li></ul><h4>10. Governing law</h4><p>These terms are governed by the laws of the <b>State of Oklahoma</b>, USA.</p><p>(Attorney to confirm governing law and venue before publication.)</p><h4>11. Contact</h4><p>White Wolf Tree Service LLC (White Wolf Digital) \u2014</p><p>whitewolfoklahoma@gmail.com.</p><h4>CONNECTED FEATURES \u2014 takes effect only when these features ship</h4><p>*The sections below apply only to future connected features (device sync via</p><p>Health Connect, AI voice logging, and the AI Goal Preview in ForgeFit). They</p><p>do not apply to the current offline versions, which never transmit data.*</p><ul><li><b>Opt-in only.</b> Connected features are off by default. Each one asks for</li></ul><p>  your separate, explicit consent \u2014 on its own consent screen, in plain</p><p>  language \u2014 before anything leaves your device. Declining never disables</p><p>  the app's offline features.</p><ul><li><b>What gets sent.</b> Only what the consent screen names, only when you use</li></ul><p>  the feature: for example, a meal description (text, or audio only if cloud</p><p>  transcription is on) for AI voice logging, or the single photo you choose</p><p>  for an AI Goal Preview.</p><ul><li><b>No retention by us.</b> Our relay service passes your request to the named</li></ul><p>  AI provider and keeps nothing \u2014 no copies of your photos, audio,</p><p>  transcripts, or entries are stored on our servers. Provider handling is</p><p>  described on the consent screen and in the Privacy Policy.</p><ul><li><b>Health data stays on the device.</b> Device sync (Health Connect) reads</li></ul><p>  your health data on your phone and stores it in the app on your phone. It</p><p>  is not uploaded to us.</p><ul><li><b>Allowances.</b> Some connected features run on third-party AI services we</li></ul><p>  pay for per use, so they may include a monthly allowance described in the</p><p>  app (for example, a set number of AI previews or voice entries per month),</p><p>  with optional additional credits. Allowances and pricing will be shown in</p><p>  the app before you use the feature; they are not a subscription unless the</p><p>  app says so in plain words.</p><ul><li><b>Permissions.</b> Connected features may request device permissions (such</li></ul><p>  as Health Connect access or the microphone) at the moment you first use</p><p>  them. You can revoke permissions any time in your device settings; the</p><p>  related feature will simply stop working.</p>";
+var LEGAL_DISCLAIMER_HTML = "<h3>Estimator Disclaimer \u2014 Contractor &amp; Trade Tools</h3><p>**Applies to: TreeBid Pro, SnowBid, WashPrice Pro, RoofSquares, JobProfit</p><p>Tracker, FieldForms Toolkit, PaintPro, FenceDeck, MarketMaker, and the other</p><p>estimating/pricing tools sold under White Wolf Digital \u2014 including bundles</p><p>that contain them.**</p><h4>Estimating aids, not finished quotes</h4><ul><li>These apps are <b>estimating and record-keeping aids</b>. Every bid, price,</li></ul><p>  cost, measurement, and total they produce is an **estimate based on the</p><p>  information and rates you enter**.</p><ul><li>**You \u2014 the business owner \u2014 are responsible for verifying everything</li></ul><p>  before you quote a customer:** measurements and quantities, site</p><p>  conditions, your current material and labor costs, your rates and margins,</p><p>  taxes, permit and license requirements, disposal rules, and any contract</p><p>  terms.</p><ul><li>Default rates, presets, and sample data included in the apps are starting</li></ul><p>  points only. They are not market prices, not industry standards, and not</p><p>  a recommendation of what you should charge.</p><ul><li>A saved quote keeps the prices in effect when you created it (price</li></ul><p>  snapshot). Changing your presets later does not change saved quotes \u2014</p><p>  and a saved quote is still your responsibility to review before sending.</p><h4>Specific tools</h4><ul><li><b>TreeBid Pro:</b> tree work is dangerous and site-specific. Difficulty</li></ul><p>  factors and presets cannot see the actual tree, lean, rot, targets, or</p><p>  access. Inspect every job in person before final pricing. The \"Invoice</p><p>  with Wave\" feature is an open-and-paste handoff \u2014 TreeBid does not</p><p>  connect to Wave, and the invoice you send from Wave is yours.</p><ul><li><b>RoofSquares / measurement tools:</b> confirm roof measurements and pitch</li></ul><p>  in person or by your usual method before ordering materials.</p><ul><li><b>SnowBid / seasonal tools:</b> route times, snowfall amounts, and service</li></ul><p>  pricing vary by storm and site; seasonal contracts are your agreement</p><p>  with your customer, on your terms.</p><ul><li><b>JobProfit Tracker:</b> profit figures depend on the costs you enter.</li></ul><p>  The app is not accounting or tax software and does not replace your</p><p>  bookkeeper or accountant.</p><h4>Bottom line</h4><p>If an output and your judgment disagree, trust your judgment \u2014 then fix the</p><p>input. We are not responsible for jobs won, lost, or mispriced based on app</p><p>outputs, within the limits of the Terms of Use.</p>";
+(function(){
+  var lst = document.createElement("style");
+  lst.textContent = "@media print{ #legalOverlay{ display:none !important; } }";
+  document.head.appendChild(lst);
+})();
+function sanitizeLegal(v){
+  if(!v || typeof v !== "object") return null;
+  if(typeof v.termsVersion !== "string" || typeof v.acceptedDate !== "string") return null;
+  return { termsVersion: v.termsVersion.slice(0, 10), acceptedDate: v.acceptedDate.slice(0, 40), disclaimerShown: !!v.disclaimerShown };
+}
+function legalRecord(){
+  try{ var s = state; return (s && s.legal) ? sanitizeLegal(s.legal) : null; }catch(e){ return null; }
+}
+function legalVersionCmp(a, b){
+  var pa = String(a).split("."), pb = String(b).split(".");
+  for(var i = 0; i < 3; i++){ var d = (parseInt(pa[i], 10) || 0) - (parseInt(pb[i], 10) || 0); if(d) return d; }
+  return 0;
+}
+function legalAcceptLine(){
+  var rec = legalRecord();
+  if(rec && rec.acceptedDate) return "You agreed to Terms v" + rec.termsVersion + " on " + rec.acceptedDate.slice(0, 10) + ".";
+  return "No Terms acceptance is recorded on this device yet \u2014 the current Terms will be shown for your agreement.";
+}
+function legalSectionHTML(){
+  var h = '<div style="border-top:2px solid rgba(127,127,127,.35);margin-top:20px;padding-top:14px;">'
+    + '<h2>Legal</h2>'
+    + '<p>' + legalAcceptLine() + '</p>'
+    + '<h3>Terms of Use (v' + TERMS_VERSION + ')</h3>'
+    + '<div style="max-height:340px;overflow-y:auto;border:1px solid rgba(127,127,127,.4);border-radius:8px;padding:10px 14px;font-size:14px;line-height:1.55;">' + LEGAL_TERMS_HTML + '</div>';
+  if(LEGAL_HAS_DISCLAIMER){
+    h += '<h3>Estimator Disclaimer</h3>'
+      + '<div style="max-height:260px;overflow-y:auto;border:1px solid rgba(127,127,127,.4);border-radius:8px;padding:10px 14px;font-size:14px;line-height:1.55;">' + LEGAL_DISCLAIMER_HTML + '</div>';
+  }
+  h += '<h3>Privacy</h3>'
+    + '<p>This app collects no data. It has no accounts, no sign-in, no analytics, and no server \u2014 everything you enter is stored only on this device, in this browser\u2019s storage, and nothing is transmitted anywhere. Files you export (backups, quotes, prints) are under your control. You are responsible for backing up your records with the app\u2019s export tools.</p>'
+    + '<p>Sold by White Wolf Tree Service LLC (White Wolf Digital) \u2014 whitewolfoklahoma@gmail.com</p>'
+    + '</div>';
+  return h;
+}
+function legalFillSection(){
+  var el = document.getElementById("legalSection");
+  if(!el) return;
+  var sig = legalAcceptLine();
+  if(el.getAttribute("data-legal-filled") === sig) return;
+  el.innerHTML = legalSectionHTML(); el.setAttribute("data-legal-filled", sig);
+}
+function legalRefreshSection(){
+  var el = document.getElementById("legalSection");
+  if(el){ el.innerHTML = legalSectionHTML(); el.setAttribute("data-legal-filled", legalAcceptLine()); }
+}
+function legalShowOverlay(isUpdate){
+  if(document.getElementById("legalOverlay")) return;
+  var ov = document.createElement("div");
+  ov.id = "legalOverlay";
+  ov.setAttribute("style", "position:fixed;inset:0;z-index:99999;background:rgba(8,10,14,.74);overflow-y:auto;padding:20px 12px;display:flex;align-items:flex-start;justify-content:center;");
+  var discBtn = LEGAL_HAS_DISCLAIMER ? '<button type="button" id="legalReadDisc" style="min-height:44px;padding:10px 14px;border-radius:10px;border:1px solid #9aa4b2;background:#ffffff;color:#1c2733;font-size:15px;cursor:pointer;">Read the Estimator Disclaimer</button>' : '';
+  var checkLabel = LEGAL_HAS_DISCLAIMER ? "I have read the disclaimer and I agree to the Terms of Use" : "I have read and I agree to the Terms of Use";
+  ov.innerHTML = '<div style="background:#ffffff;color:#1c2733;max-width:560px;width:100%;border-radius:14px;padding:22px 20px;box-shadow:0 18px 50px rgba(0,0,0,.45);font-size:15px;line-height:1.55;">'
+    + '<h2 style="margin:0 0 6px;font-size:21px;">' + LEGAL_APP_NAME + ' \u2014 Terms of Use</h2>'
+    + (isUpdate ? '<p style="background:#fdf3d7;border:1px solid #e4cf8a;border-radius:8px;padding:8px 10px;"><b>Our terms were updated (v' + TERMS_VERSION + ').</b></p>' : '')
+    + '<p style="font-size:16px;"><b>Your data stays on your device.</b><br><b>Estimates are aids, not guarantees.</b><br><b>You\'re responsible for checking outputs before you rely on them.</b></p>'
+    + '<p>The full Terms' + (LEGAL_HAS_DISCLAIMER ? ' and Disclaimer are' : ' are') + ' one tap away, now and any time in Settings \u2192 Legal.</p>'
+    + '<div id="legalReader" style="display:none;max-height:44vh;overflow-y:auto;border:1px solid #d5dbe3;border-radius:10px;padding:10px 14px;margin:10px 0;font-size:14px;"></div>'
+    + '<p style="display:flex;gap:8px;flex-wrap:wrap;"><button type="button" id="legalReadTerms" style="min-height:44px;padding:10px 14px;border-radius:10px;border:1px solid #9aa4b2;background:#ffffff;color:#1c2733;font-size:15px;cursor:pointer;">Read the full Terms</button>' + discBtn + '</p>'
+    + '<label style="display:flex;gap:10px;align-items:flex-start;margin:12px 0;cursor:pointer;"><input type="checkbox" id="legalCheck" style="width:22px;height:22px;min-width:22px;margin-top:1px;cursor:pointer;"><span>' + checkLabel + '</span></label>'
+    + '<button type="button" id="legalAgree" disabled style="min-height:52px;width:100%;border:0;border-radius:10px;background:#1f5fa8;color:#ffffff;font-size:17px;font-weight:700;cursor:pointer;opacity:.55;">I Agree</button>'
+    + '<p style="font-size:13px;color:#5a6675;margin-bottom:0;">Your records stay loaded behind this screen and are never deleted or locked, whether or not you agree now.</p>'
+    + '</div>';
+  document.body.appendChild(ov);
+  var reader = ov.querySelector("#legalReader");
+  var showing = "";
+  function toggleReader(kind){
+    if(showing === kind){ reader.style.display = "none"; showing = ""; return; }
+    reader.innerHTML = kind === "terms" ? LEGAL_TERMS_HTML : LEGAL_DISCLAIMER_HTML;
+    reader.style.display = "block"; showing = kind;
+    reader.scrollTop = 0;
+  }
+  ov.querySelector("#legalReadTerms").addEventListener("click", function(){ toggleReader("terms"); });
+  var db = ov.querySelector("#legalReadDisc");
+  if(db) db.addEventListener("click", function(){ toggleReader("disc"); });
+  var legalChk = ov.querySelector("#legalCheck");
+  var legalAgreeBtn = ov.querySelector("#legalAgree");
+  legalChk.addEventListener("change", function(){ legalAgreeBtn.disabled = !legalChk.checked; legalAgreeBtn.style.opacity = legalChk.checked ? "1" : ".55"; });
+  legalAgreeBtn.addEventListener("click", function(){
+    if(!legalChk.checked) return;
+    try{ state.legal = { termsVersion: TERMS_VERSION, acceptedDate: new Date().toISOString(), disclaimerShown: LEGAL_HAS_DISCLAIMER }; save(); }catch(e){}
+    if(ov.parentNode) ov.parentNode.removeChild(ov);
+    legalRefreshSection();
+  });
+}
+function legalInit(){
+  legalFillSection();
+  var rec = legalRecord();
+  if(rec && legalVersionCmp(rec.termsVersion, TERMS_VERSION) >= 0) return;
+  legalShowOverlay(!!rec);
+}
+if(typeof MutationObserver !== "undefined"){
+  var legalObs = new MutationObserver(function(){ legalFillSection(); });
+  legalObs.observe(document.documentElement, { childList: true, subtree: true });
+}
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", function(){ setTimeout(legalInit, 30); });
+else setTimeout(legalInit, 30);
+
+</script>
+</body>
+</html>
